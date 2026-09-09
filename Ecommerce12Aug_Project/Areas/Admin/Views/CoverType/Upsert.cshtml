@@ -1,0 +1,53 @@
+﻿@model Ecommerce12Aug_Project.Models.CoverType
+
+@{
+    var title = Model.Id != 0 ? "Update Cover Type":"Create Cover Type";
+    // var saveUpdate = Model.Id != 0 ? "Update" : "Save";
+}
+
+<form method="post">
+    @if(Model.Id == 0)
+        {
+            <input type="hidden" asp-for="Id" />
+        }
+
+        <div class="col-10 border-bottom">
+            <div class="text-primary">@title</div>
+        </div>
+        <div asp-validation-summary="ModelOnly" class="text-danger">
+        </div>
+        <div class="row col-8">
+        <div class="form-group row m-2 p-2">
+            <div class="col-4">
+                <label asp-for="Name"></label>
+            </div>
+            <div class="col-8">
+                <input asp-for="Name" class="form-control" />
+                <span asp-validation-for="Name" class="text-danger"></span>
+            </div>
+        </div>
+    <div class="row form-grop m-2 p-2">
+        @* <div class="col-4 offset-4">
+            <button type="submit" class="btn btn-success form-control">@saveUpdate</button>
+        </div>
+        <div class="col-4">
+                <a asp-action="Index" class="btn btn-success form-control">Back To Home</a>
+        </div> *@
+
+                @if(Model.Id != 0)
+                {
+               <partial name="_EditAndBackToViewButton" />
+                }
+                else
+                {
+                <partial name="_CreateAndBackToListButton" />
+                }
+
+
+    </div>
+    </div>
+    </form>
+
+@section Scripts{
+    <partial name="_ValidationScriptsPartial" />
+}

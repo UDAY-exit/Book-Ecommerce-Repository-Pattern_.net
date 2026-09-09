@@ -1,0 +1,109 @@
+﻿@model IEnumerable<Ecommerce12Aug_Project.Models.Product>
+
+
+
+
+<table id="productTable"
+       class="display w-100">
+
+    <thead class="d-none">
+        <tr>
+            <th>Image</th>
+            <th>Title</th>
+            <th>Author</th>
+            <th>List Price</th>
+            <th>Price</th>
+            <th>Action</th>
+        </tr>
+    </thead>
+
+
+    <tbody class="d-flex flex-wrap gap-3 justify-content-center">
+
+        @foreach (var product in Model)
+        {
+            <tr class="d-flex flex-column border rounded p-2"
+                style="width: calc(25% - 12px);">
+
+                <!-- Image -->
+                <td class="border-0 p-1">
+                    <img src="@product.ImageUrl"
+                         class="img-fluid rounded w-100"
+                         style="height:300px; object-fit:contain;"
+                         alt="@product.Title" />
+                </td>
+
+                <!-- Title -->
+                <td class="border-0 p-1">
+
+                    <p class="mb-2 text-truncate">
+                        <b class="text-dark">
+                            @product.Title
+                        </b>
+                    </p>
+
+                </td>
+
+                <!-- Author -->
+                <td class="border-0 p-1">
+
+                    <p class="text-primary mb-2">
+                        by <b>@product.Author</b>
+                    </p>
+
+                </td>
+
+                <!-- List Price -->
+                <td class="border-0 p-1">
+
+                    <p class="mb-2">
+                        List Price:
+                        <strike>
+                            <b>
+                                $@product.ListPrice.ToString("0.00")
+                            </b>
+                        </strike>
+                    </p>
+
+                </td>
+
+                <!-- Price -->
+                <td class="border-0 p-1">
+
+                    <p class="text-danger mb-2">
+                        As low as:
+                        <b>
+                            $@product.Price100.ToString("0.00")
+                        </b>
+                    </p>
+
+                </td>
+
+                <!-- Details -->
+                <td class="border-0 p-1 mt-auto">
+
+                    <a asp-action="Details"
+                       asp-route-id="@product.Id"
+                       class="btn btn-success w-100">
+
+                        Details
+
+                    </a>
+
+                </td>
+
+            </tr>
+
+
+        }
+
+    </tbody>
+
+</table>
+
+
+@section Scripts {
+
+    <script src="~/js/home.js"></script>
+
+}
