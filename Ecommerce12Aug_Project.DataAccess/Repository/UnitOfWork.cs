@@ -1,5 +1,6 @@
 ﻿using Ecommerce12Aug_Project.Data;
 using Ecommerce12Aug_Project.DataAccess.Repository.IRepository;
+using Ecommerce12Aug_Project.Models;
 using System;
 using System.Collections.Generic;
 using System.Text;
@@ -24,7 +25,7 @@ namespace Ecommerce12Aug_Project.DataAccess.Repository
         public IProductRepository Product { private set; get; }
         public ICompanyRepository Company { private set; get; }
 
-        public IApplicationUserRepository ApplicationUser {  private set; get; }
+       public IApplicationUserRepository ApplicationUser {  private set; get; }
 
         public void Save()
         {

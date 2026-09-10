@@ -15,7 +15,9 @@ namespace Ecommerce12Aug_Project.Areas.Coustomer.Controllers
         }
         public IActionResult Index()
         {
-            return View(_unitOfWork.Product.GetAll());
+            var products = _unitOfWork.Product.GetAll();
+            return View(products);
+
         }
 
         public IActionResult Privacy()

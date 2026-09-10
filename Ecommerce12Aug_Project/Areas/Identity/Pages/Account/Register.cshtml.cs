@@ -1,13 +1,16 @@
 // Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 
+using Ecommerce12Aug_Project.DataAccess.Repository.IRepository;
 using Ecommerce12Aug_Project.Models;
+using Ecommerce12Aug_Project.Utility;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.UI.Services;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
+using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.AspNetCore.WebUtilities;
 using Microsoft.Extensions.Logging;
 using System;
@@ -24,26 +27,35 @@ namespace Ecommerce12Aug_Project.Areas.Identity.Pages.Account;
 
 public class RegisterModel : PageModel
 {
-    private readonly SignInManager<IdentityUser> _signInManager;
-    private readonly UserManager<IdentityUser> _userManager;
-    private readonly IUserStore<IdentityUser> _userStore;
-    //private readonly IUserEmailStore<IdentityUser> _emailStore;
+    private readonly SignInManager<ApplicationUser> _signInManager;
+    private readonly UserManager<ApplicationUser> _userManager;
+    private readonly IUserStore<ApplicationUser> _userStore;
+    private readonly IUserEmailStore<ApplicationUser> _emailStore;
     private readonly ILogger<RegisterModel> _logger;
     private readonly IEmailSender _emailSender;
+    private readonly RoleManager<IdentityRole> _roleManager;
+
+    private readonly IUnitOfWork _unitOfWork;
 
     public RegisterModel(
-        UserManager<IdentityUser> userManager,
-        IUserStore<IdentityUser> userStore,
-        SignInManager<IdentityUser> signInManager,
+        UserManager<ApplicationUser> userManager,
+        IUserStore<ApplicationUser> userStore,
+        SignInManager<ApplicationUser> signInManager,
         ILogger<RegisterModel> logger,
-        IEmailSender emailSender)
+        IEmailSender emailSender,
+        RoleManager<IdentityRole> roleManager,
+        IUnitOfWork unitOfWork
+        )
+        
     {
         _userManager = userManager;
+        _unitOfWork = unitOfWork;
         _userStore = userStore;
-        //_emailStore = GetEmailStore();
+        _emailStore = GetEmailStore();
         _signInManager = signInManager;
         _logger = logger;
         _emailSender = emailSender;
+        _roleManager = roleManager;
     }
 
     /// <summary>
@@ -114,11 +126,29 @@ public class RegisterModel : PageModel
         [Display(Name = "Company")]
         public int? CompanyId { get; set; }
         public string Role { get; set; }
+
+        //Role And Company
+
+        public IEnumerable<SelectListItem> RoleList { get; set; }
+        public IEnumerable<SelectListItem> CompanyList { get; set; }
     }
 
 
     public async Task OnGetAsync(string? returnUrl = null)
     {
+        Input = new InputModel()
+        {
+            CompanyList = _unitOfWork.Company.GetAll().Select(cl => new SelectListItem()
+            {
+                Text = cl.Name,
+                Value = cl.Id.ToString()
+            }),
+            RoleList = _roleManager.Roles.Where(r => r.Name != SD.Role_Individual).Select(r => r.Name).Select(rl => new SelectListItem()
+            {
+                Text = rl,
+                Value = rl
+            })
+        };
         ReturnUrl = returnUrl;
         ExternalLogins = (await _signInManager.GetExternalAuthenticationSchemesAsync()).ToList();
     }
@@ -132,20 +162,52 @@ public class RegisterModel : PageModel
             //var user = CreateUser();
             var user = new ApplicationUser()
             {
-
+                Name = Input.Name,
+                UserName = Input.Email,
+                Email = Input.Email,
+                PhoneNumber = Input.PhoneNumber,
+                StreetAdress = Input.StreetAdress,
+                Cty = Input.Cty,
+                State = Input.State,
+                PostalCode = Input.PostalCode,
+                CompanyId = Input.CompanyId,
+                Role = Input.Role
             };
 
             await _userStore.SetUserNameAsync(user, Input.Email, CancellationToken.None);
-            //await _emailStore.SetEmailAsync(user, Input.Email, CancellationToken.None);
+            await _emailStore.SetEmailAsync(user, Input.Email, CancellationToken.None);
             var result = await _userManager.CreateAsync(user, Input.Password);
 
             if (result.Succeeded)
             {
                 _logger.LogInformation("User created a new account with password.");
 
-                var userId = await _userManager.GetUserIdAsync(user);
-                var code = await _userManager.GenerateEmailConfirmationTokenAsync(user);
-                code = WebEncoders.Base64UrlEncode(Encoding.UTF8.GetBytes(code));
+                //Create Role
+                if(!await _roleManager.RoleExistsAsync(SD.Role_Admin))
+                {
+                    await _roleManager.CreateAsync(new IdentityRole(SD.Role_Admin));
+                }
+                if (!await _roleManager.RoleExistsAsync(SD.Role_Individual))
+                {
+                    await _roleManager.CreateAsync(new IdentityRole(SD.Role_Individual));
+                }
+                if (!await _roleManager.RoleExistsAsync(SD.Role_Employee))
+                {
+                    await _roleManager.CreateAsync(new IdentityRole(SD.Role_Employee));
+                }
+                if (!await _roleManager.RoleExistsAsync(SD.Role_Company))
+                {
+                    await _roleManager.CreateAsync(new IdentityRole(SD.Role_Company));
+                }
+
+                //*****
+
+                //Add Admin Role To User
+               // await _userManager.AddToRoleAsync(user, SD.Role_Admin);
+
+                //var userId = await _userManager.GetUserIdAsync(user);
+                //var code = await _userManager.GenerateEmailConfirmationTokenAsync(user);
+                //code = WebEncoders.Base64UrlEncode(Encoding.UTF8.GetBytes(code));
                 //var callbackUrl = Url.Page(
                 //    "/Account/ConfirmEmail",
                 //    pageHandler: null,

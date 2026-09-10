@@ -1,4 +1,5 @@
 ﻿using Ecommerce12Aug_Project.DataAccess.Migrations;
+using Ecommerce12Aug_Project.Models;
 using System;
 using System.Collections.Generic;
 using System.Text;

@@ -2,6 +2,7 @@ using Ecommerce12Aug_Project.Data;
 using Ecommerce12Aug_Project.DataAccess.Migrations;
 using Ecommerce12Aug_Project.DataAccess.Repository;
 using Ecommerce12Aug_Project.DataAccess.Repository.IRepository;
+using Ecommerce12Aug_Project.Models;
 using Ecommerce12Aug_Project.Utility;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.UI.Services;
@@ -17,9 +18,9 @@ builder.Services.AddDatabaseDeveloperPageExceptionFilter();
 
 //builder.Services.AddDefaultIdentity<IdentityUser>(options => options.SignIn.RequireConfirmedAccount = true)
 //    .AddEntityFrameworkStores<ApplicationDbContext>();
-builder.Services.AddIdentity<IdentityUser,IdentityRole>().
-    AddDefaultTokenProviders().AddEntityFrameworkStores<ApplicationDbContext>();
-
+builder.Services.AddIdentity<ApplicationUser,IdentityRole>().
+    AddDefaultTokenProviders().
+    AddEntityFrameworkStores<ApplicationDbContext>();
 
 
 builder.Services.AddControllersWithViews().AddRazorRuntimeCompilation();
@@ -45,7 +46,7 @@ else
 
 app.UseHttpsRedirection();
 app.UseRouting();
-
+app.UseAuthentication();
 app.UseAuthorization();
 
 app.MapStaticAssets();
