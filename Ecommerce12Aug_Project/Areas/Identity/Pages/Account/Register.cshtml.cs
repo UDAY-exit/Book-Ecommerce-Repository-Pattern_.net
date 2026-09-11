@@ -203,7 +203,7 @@ public class RegisterModel : PageModel
                 //*****
 
                 //Add Admin Role To User
-               // await _userManager.AddToRoleAsync(user, SD.Role_Admin);
+                // await _userManager.AddToRoleAsync(user, SD.Role_Admin);
 
                 //var userId = await _userManager.GetUserIdAsync(user);
                 //var code = await _userManager.GenerateEmailConfirmationTokenAsync(user);
@@ -216,6 +216,25 @@ public class RegisterModel : PageModel
 
                 //await _emailSender.SendEmailAsync(Input.Email, "Confirm your email",
                 //    $"Please confirm your account by <a href='{HtmlEncoder.Default.Encode(callbackUrl)}'>clicking here</a>.");
+
+                if (Input.Role == null && Input.CompanyId == null)
+                {
+                    await _userManager.AddToRoleAsync(user, SD.Role_Individual);
+                }
+                else
+                {
+                    if (Input.CompanyId > 0)
+                    {
+                        await _userManager.AddToRoleAsync(user, SD.Role_Company);
+                    }
+                    else
+                    {
+                        await _userManager.AddToRoleAsync(user,Input.Role);
+                    }
+                }
+
+
+
 
                 if (_userManager.Options.SignIn.RequireConfirmedAccount)
                 {
