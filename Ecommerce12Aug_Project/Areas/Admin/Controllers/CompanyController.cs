@@ -1,10 +1,15 @@
 ﻿using Ecommerce12Aug_Project.DataAccess.Repository.IRepository;
 using Ecommerce12Aug_Project.Models;
+using Ecommerce12Aug_Project.Utility;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Ecommerce12Aug_Project.Areas.Admin.Controllers
 {
     [Area("Admin")]
+    [Authorize(Roles = SD.Role_Admin)]
+
+
     public class CompanyController : Controller
     {
         private readonly IUnitOfWork _unitOfWork;

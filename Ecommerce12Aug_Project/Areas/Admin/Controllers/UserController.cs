@@ -1,11 +1,15 @@
 ﻿using Ecommerce12Aug_Project.Data;
 using Ecommerce12Aug_Project.DataAccess.Repository.IRepository;
 using Ecommerce12Aug_Project.Models;
+using Ecommerce12Aug_Project.Utility;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Ecommerce12Aug_Project.Areas.Admin.Controllers
 {
     [Area("Admin")]
+    [Authorize(Roles =SD.Role_Admin)]
+
     public class UserController : Controller
     {
         private readonly ApplicationDbContext _context;
@@ -19,6 +23,9 @@ namespace Ecommerce12Aug_Project.Areas.Admin.Controllers
         {
             return View();
         }
+
+
+
         #region APIs
 
         [HttpGet]
@@ -47,8 +54,35 @@ namespace Ecommerce12Aug_Project.Areas.Admin.Controllers
                     };
                 }
             }
+            //Remove Admin ROle User
+
+            var adminUser = userList.FirstOrDefault(u => u.Role == SD.Role_Admin);
+            userList.Remove(adminUser);
+
+            return Json(new { data = userList });
         }
 
+        [HttpPost]
+        public IActionResult LockUnlock([FromBody]string Id)
+        {
+            bool isLocked = false;
+            var userInDb = _unitOfWork.ApplicationUser.FirstOrDefault(u => u.Id == Id);
+            if(userInDb == null)
+            {
+                return Json(new { success = false, message = "Something went wrong When Lock And Unlock User" });
+            }if(userInDb != null && userInDb.LockoutEnd > DateTime.Now)
+            {
+                userInDb.LockoutEnd = DateTime.Now;
+                isLocked = false;
+            }
+            else
+            {
+                userInDb.LockoutEnd = DateTime.Now.AddYears(100);
+                isLocked = true;
+            }
+            _context.SaveChanges();
+            return Json(new { success = true, message = isLocked == true ? "User Successfully Locked" : "User SuccessFully Unlocked" });
+        }
 
         #endregion
     }

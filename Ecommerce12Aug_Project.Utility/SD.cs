@@ -4,7 +4,7 @@ using System.Text;
 
 namespace Ecommerce12Aug_Project.Utility
 {
-    public class SD
+    public static class SD
     {
         //Roles
         public const string Role_Admin = "Admin User";

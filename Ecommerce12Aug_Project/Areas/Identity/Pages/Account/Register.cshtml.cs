@@ -44,12 +44,12 @@ public class RegisterModel : PageModel
         ILogger<RegisterModel> logger,
         IEmailSender emailSender,
         RoleManager<IdentityRole> roleManager,
-        IUnitOfWork unitOfWork
+        IUnitOfWork unitOfWork//
         )
         
     {
         _userManager = userManager;
-        _unitOfWork = unitOfWork;
+        _unitOfWork = unitOfWork;//
         _userStore = userStore;
         _emailStore = GetEmailStore();
         _signInManager = signInManager;
@@ -242,8 +242,15 @@ public class RegisterModel : PageModel
                 }
                 else
                 {
-                    await _signInManager.SignInAsync(user, isPersistent: false);
-                    return LocalRedirect(returnUrl);
+                    if(Input.Role == null && Input.CompanyId == null)
+                    {
+                        await _signInManager.SignInAsync(user, isPersistent: false);
+                        return LocalRedirect(returnUrl);
+                    }
+                    else
+                    {
+                        return RedirectToAction("Index", "User", new { Area = "Admin" });
+                    }
                 }
             }
             foreach (var error in result.Errors)
