@@ -18,6 +18,7 @@ using Microsoft.AspNetCore.WebUtilities;
 using Microsoft.Extensions.Logging;
 
 using Ecommerce12Aug_Project.Models;
+using Ecommerce12Aug_Project.Utility;
 
 namespace Ecommerce12Aug_Project.Areas.Identity.Pages.Account;
 
@@ -85,6 +86,20 @@ public class ExternalLoginModel : PageModel
         [Required]
         [EmailAddress]
         public string Email { get; set; } = default!;
+
+
+        //Add columns
+
+        [Required]
+        public string Name { get;set;  }
+        [Display(Name = "Address")]
+        public string StreetAddress { get; set; }
+        public string City { get; set; }
+        public string State { get; set; }
+        [Display (Name = "Postal Code")]
+        public string PostalCode { get; set; }
+        [Display(Name = "Phone Number")]
+        public string PhoneNumber { get; set; }
     }
         
     public IActionResult OnGet() => RedirectToPage("./Login");
@@ -132,7 +147,9 @@ public class ExternalLoginModel : PageModel
             {
                 Input = new InputModel
                 {
-                    Email = info.Principal.FindFirstValue(ClaimTypes.Email)!
+                    Email = info.Principal.FindFirstValue(ClaimTypes.Email)!,
+                    //Get the name from facebook or anywhere.
+                    Name = info.Principal.FindFirstValue(ClaimTypes.Name)!
                 };
             }
             return Page();
@@ -152,7 +169,18 @@ public class ExternalLoginModel : PageModel
 
         if (ModelState.IsValid)
         {
-            var user = CreateUser();
+            //var user = CreateUser();
+            var user = new ApplicationUser()
+            {
+                UserName = Input.Email,
+                Email = Input.Email,
+                Name = Input.Name,
+                StreetAdress = Input.StreetAddress,
+                Cty = Input.City,
+                State = Input.State,
+                PostalCode = Input.PostalCode,
+                PhoneNumber = Input.PhoneNumber
+            };
 
             await _userStore.SetUserNameAsync(user, Input.Email, CancellationToken.None);
             await _emailStore.SetEmailAsync(user, Input.Email, CancellationToken.None);
@@ -165,17 +193,20 @@ public class ExternalLoginModel : PageModel
                 {
                     _logger.LogInformation("User created an account using {Name} provider.", info.LoginProvider);
 
-                    var userId = await _userManager.GetUserIdAsync(user);
-                    var code = await _userManager.GenerateEmailConfirmationTokenAsync(user);
-                    code = WebEncoders.Base64UrlEncode(Encoding.UTF8.GetBytes(code));
-                    var callbackUrl = Url.Page(
-                        "/Account/ConfirmEmail",
-                        pageHandler: null,
-                        values: new { area = "Identity", userId = userId, code = code },
-                        protocol: Request.Scheme)!;
+                    //code for making the individual user
+                    await _userManager.AddToRoleAsync(user, SD.Role_Individual);
 
-                    await _emailSender.SendEmailAsync(Input.Email, "Confirm your email",
-                        $"Please confirm your account by <a href='{HtmlEncoder.Default.Encode(callbackUrl)}'>clicking here</a>.");
+                    //var userId = await _userManager.GetUserIdAsync(user);
+                    //var code = await _userManager.GenerateEmailConfirmationTokenAsync(user);
+                    //code = WebEncoders.Base64UrlEncode(Encoding.UTF8.GetBytes(code));
+                    //var callbackUrl = Url.Page(
+                    //    "/Account/ConfirmEmail",
+                    //    pageHandler: null,
+                    //    values: new { area = "Identity", userId = userId, code = code },
+                    //    protocol: Request.Scheme)!;
+
+                    //await _emailSender.SendEmailAsync(Input.Email, "Confirm your email",
+                    //    $"Please confirm your account by <a href='{HtmlEncoder.Default.Encode(callbackUrl)}'>clicking here</a>.");
 
                     // If account confirmation is required, we need to show the link if we don't have a real email sender
                     if (_userManager.Options.SignIn.RequireConfirmedAccount)

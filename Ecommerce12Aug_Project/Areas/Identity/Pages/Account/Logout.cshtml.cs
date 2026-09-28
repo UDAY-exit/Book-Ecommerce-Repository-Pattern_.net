@@ -10,6 +10,7 @@ using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.Extensions.Logging;
 
 using Ecommerce12Aug_Project.Models;
+using Ecommerce12Aug_Project.Utility;
 
 namespace Ecommerce12Aug_Project.Areas.Identity.Pages.Account;
 
@@ -26,6 +27,7 @@ public class LogoutModel : PageModel
 
     public async Task<IActionResult> OnPost(string? returnUrl = null)
     {
+        HttpContext.Session.SetInt32(SD.Ss_CartSessionCount, 0);
         await _signInManager.SignOutAsync();
         _logger.LogInformation("User logged out.");
         if (returnUrl != null)

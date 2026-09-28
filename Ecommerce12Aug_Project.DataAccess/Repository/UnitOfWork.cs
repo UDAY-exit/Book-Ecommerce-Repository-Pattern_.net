@@ -18,6 +18,9 @@ namespace Ecommerce12Aug_Project.DataAccess.Repository
             Product = new ProductRepository(context);
             Company = new CompanyRepository(context);
             ApplicationUser = new ApplicationUserRepository(context);
+            ShoppingCart = new ShopingCartRepository(context);
+            OrderDetail = new OrderDetailRepository(context);
+            OrderHeader = new OrderHeaderRepository(context);
         }
         public ICatagoryRepository Catagory { private set; get; }
 
@@ -26,6 +29,9 @@ namespace Ecommerce12Aug_Project.DataAccess.Repository
         public ICompanyRepository Company { private set; get; }
 
        public IApplicationUserRepository ApplicationUser {  private set; get; }
+        public IShoppingCartRepository ShoppingCart { private set; get; }
+        public IOrderHeaderRepository OrderHeader { private set; get; }
+        public IOrderDetailRepository OrderDetail { private set; get; }
 
         public void Save()
         {

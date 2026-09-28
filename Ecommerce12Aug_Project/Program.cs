@@ -38,6 +38,27 @@ builder.Services.ConfigureApplicationCookie(options =>
     options.LogoutPath = $"/Identity/Account/Logout";
 });
 
+//builder.Services.AddAuthentication().AddFacebook(options =>
+//{
+//    options.AppId = "";
+//    options.AppSecret = "";
+//});
+
+
+//builder.Services.AddAuthentication().AddGoogle(options =>
+//{
+//    options.ClientId = "";
+//    options.ClientSecret = "";
+
+//});
+
+builder.Services.AddSession(options =>
+{
+    options.IdleTimeout = TimeSpan.FromMinutes(30);
+    options.Cookie.HttpOnly = true;
+    options.Cookie.IsEssential = true;
+});
+
 
 var app = builder.Build();
 
@@ -54,6 +75,9 @@ else
 }
 
 app.UseHttpsRedirection();
+
+app.UseSession();
+
 app.UseRouting();
 app.UseAuthentication();
 app.UseAuthorization();
