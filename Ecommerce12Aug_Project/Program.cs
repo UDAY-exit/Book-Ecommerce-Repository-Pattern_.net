@@ -7,6 +7,7 @@ using Ecommerce12Aug_Project.Utility;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.UI.Services;
 using Microsoft.EntityFrameworkCore;
+using Stripe;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -18,8 +19,11 @@ builder.Services.AddDatabaseDeveloperPageExceptionFilter();
 
 //builder.Services.AddDefaultIdentity<IdentityUser>(options => options.SignIn.RequireConfirmedAccount = true)
 //    .AddEntityFrameworkStores<ApplicationDbContext>();
-builder.Services.AddIdentity<ApplicationUser,IdentityRole>().
-    AddDefaultTokenProviders().
+builder.Services.AddIdentity<ApplicationUser,IdentityRole>(options =>
+{
+    options.SignIn.RequireConfirmedAccount = true;
+})
+    .AddDefaultTokenProviders().
     AddEntityFrameworkStores<ApplicationDbContext>();
 
 
@@ -29,7 +33,7 @@ builder.Services.AddRazorPages();
 
 builder.Services.AddScoped<IUnitOfWork, UnitOfWork>();
 builder.Services.AddScoped<IEmailSender, EmailSender>();
-
+builder.Services.AddScoped<TwilioService>();
 
 builder.Services.ConfigureApplicationCookie(options =>
 {
@@ -38,19 +42,19 @@ builder.Services.ConfigureApplicationCookie(options =>
     options.LogoutPath = $"/Identity/Account/Logout";
 });
 
-//builder.Services.AddAuthentication().AddFacebook(options =>
-//{
-//    options.AppId = "";
-//    options.AppSecret = "";
-//});
+builder.Services.AddAuthentication().AddFacebook(options =>
+{
+    options.AppId = "";
+    options.AppSecret = "";
+});
 
 
-//builder.Services.AddAuthentication().AddGoogle(options =>
-//{
-//    options.ClientId = "";
-//    options.ClientSecret = "";
+builder.Services.AddAuthentication().AddGoogle(options =>
+{
+    options.ClientId = "";
+    options.ClientSecret = "";
 
-//});
+});
 
 builder.Services.AddSession(options =>
 {
@@ -58,6 +62,16 @@ builder.Services.AddSession(options =>
     options.Cookie.HttpOnly = true;
     options.Cookie.IsEssential = true;
 });
+
+builder.Services.Configure<StripeSettings>
+    (builder.Configuration.GetSection("StripeSettings"));
+
+builder.Services.Configure<EmailSettings>
+    (builder.Configuration.GetSection("EmailSettings"));
+
+//twilio
+builder.Services.Configure<TwilioSettings>
+    (builder.Configuration.GetSection("Twilio"));
 
 
 var app = builder.Build();
@@ -79,6 +93,9 @@ app.UseHttpsRedirection();
 app.UseSession();
 
 app.UseRouting();
+
+StripeConfiguration.ApiKey = builder.Configuration.GetSection("StripeSettings")["Secretkey"];
+
 app.UseAuthentication();
 app.UseAuthorization();
 

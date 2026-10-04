@@ -1,14 +1,74 @@
-﻿@model int
-<div class="container row">
-    <div class="col-12 text-center">
-        <h1 class="text-primary text-center">Order Submitted Successfully</h1><br />
-        <img src="~/images/success.jpg" width="50%" />
+﻿
+@model int
+
+<div class="container d-flex justify-content-center align-items-center"
+     style="min-height: 75vh;">
+
+    <div class="card border-0 shadow-lg text-center"
+         style="max-width: 650px; width: 100%; border-radius: 25px; overflow: hidden;">
+
+        <div class="p-5">
+
+            <!-- Success Image -->
+            <img src="https://img.icons8.com/3d-fluency/200/ok.png"
+                 alt="Order Successful"
+                 style="width: 150px; margin-bottom: 20px;" />
+
+            <!-- Heading -->
+            <h1 class="font-weight-bold text-success mb-3">
+                Order Submitted Successfully!
+            </h1>
+
+            <p class="text-muted mb-4" style="font-size: 17px;">
+                Thank you for your order! 🎉
+                <br />
+                We've received your order and will send you a
+                confirmation email shortly.
+            </p>
+
+            <!-- Order Number -->
+            <div class="p-3 mb-4"
+                 style="background: #f1f8f4; border-radius: 15px;">
+
+                <span class="text-muted d-block mb-1">
+                    Your Order Number
+                </span>
+
+                <span class="font-weight-bold text-dark"
+                      style="font-size: 28px;">
+                    #@Model
+                </span>
+
+            </div>
+
+            <!-- Status -->
+            <div class="d-flex justify-content-center align-items-center mb-4">
+                <span class="badge badge-success px-3 py-2"
+                      style="font-size: 14px; border-radius: 20px;">
+                    ✓ Order Confirmed
+                </span>
+            </div>
+
+            <!-- Continue Shopping -->
+            <a asp-area="" asp-controller="Home" asp-action="Index"
+               class="btn btn-success px-5 py-3"
+               style="border-radius: 30px; font-weight: 600;">
+                Continue Shopping
+            </a>
+
+        </div>
+
+        <!-- Bottom message -->
+        <div class="py-3"
+             style="background: #f8f9fa;">
+
+            <small class="text-muted">
+                Need help? Contact our support team.
+            </small>
+
+        </div>
+
     </div>
-    <div class="col-12 text-center" style="color:green">
-        <br />
-        Thank you for your order! <br />
-        We have received your order and we will send a follow up email shortly!
-        <br />
-        Your Order Number is :@Model
-    </div>
+
 </div>
+

@@ -2,20 +2,24 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 
 
-using System;
-using System.Collections.Generic;
-using System.ComponentModel.DataAnnotations;
-using System.Linq;
-using System.Threading.Tasks;
-using Microsoft.AspNetCore.Authorization;
+using Ecommerce12Aug_Project.Models;
+using Ecommerce12Aug_Project.Utility;
 using Microsoft.AspNetCore.Authentication;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.UI.Services;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
+using Microsoft.AspNetCore.WebUtilities;
 using Microsoft.Extensions.Logging;
+using System;
+using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations;
+using System.Linq;
+using System.Text;
+using System.Text.Encodings.Web;
+using System.Threading.Tasks;
 
-using Ecommerce12Aug_Project.Models;
 
 namespace Ecommerce12Aug_Project.Areas.Identity.Pages.Account;
 
@@ -23,11 +27,16 @@ public class LoginModel : PageModel
 {
     private readonly SignInManager<ApplicationUser> _signInManager;
     private readonly ILogger<LoginModel> _logger;
+    private readonly UserManager<ApplicationUser> _userManager;
+    private readonly IEmailSender _emailSender;
 
-    public LoginModel(SignInManager<ApplicationUser> signInManager, ILogger<LoginModel> logger)
+    public LoginModel(SignInManager<ApplicationUser> signInManager, ILogger<LoginModel> logger, UserManager<ApplicationUser> userManager,
+    IEmailSender emailSender)
     {
         _signInManager = signInManager;
         _logger = logger;
+        _userManager = userManager;
+        _emailSender = emailSender;
     }
 
     /// <summary>
@@ -119,6 +128,47 @@ public class LoginModel : PageModel
                 _logger.LogInformation("User logged in.");
                 return LocalRedirect(returnUrl);
             }
+
+            if (result.IsNotAllowed)
+            {
+                var user = await _userManager.FindByEmailAsync(Input.Email);
+
+                if (user != null && !await _userManager.IsEmailConfirmedAsync(user))
+                {
+                    var userId = await _userManager.GetUserIdAsync(user);
+
+                    var code = await _userManager.GenerateEmailConfirmationTokenAsync(user);
+
+                    code = WebEncoders.Base64UrlEncode(
+                        Encoding.UTF8.GetBytes(code));
+
+                    var callbackUrl = Url.Page(
+                        "/Account/ConfirmEmail",
+                        pageHandler: null,
+                        values: new
+                        {
+                            area = "Identity",
+                            userId = userId,
+                            code = code
+                        },
+                        protocol: Request.Scheme);
+
+                    await _emailSender.SendEmailAsync(
+                        Input.Email,
+                        "Confirm your email",
+                        $"Please confirm your account by " +
+                        $"<a href='{HtmlEncoder.Default.Encode(callbackUrl!)}'>" +
+                        $"clicking here</a>.");
+
+                    ModelState.AddModelError(
+                        string.Empty,
+                        "Your email is not verified. A verification link has been sent to your email.");
+
+                    return Page();
+                }
+            }
+
+
             if (result.RequiresTwoFactor)
             {
                 return RedirectToPage("./LoginWith2fa", new { ReturnUrl = returnUrl, RememberMe = Input.RememberMe });
